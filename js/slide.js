@@ -1,6 +1,6 @@
 export default class Slide {
   constructor(slide, wrapper) {
-    this.slide = document.querySelector(slide);
+    this.slides = document.querySelector(slide);
     this.wrapper = document.querySelector(wrapper);
     this.dist = {
       finalPosition: 0,
@@ -11,7 +11,7 @@ export default class Slide {
 
   moveSlide(distX) {
     this.dist.movePosition = distX;
-    this.slide.style.transform = `translate3d(${distX}px, 0, 0)`
+    this.slides.style.transform = `translate3d(${distX}px, 0, 0)`
   }
 
   updatePosition(clientX) {
@@ -57,9 +57,42 @@ export default class Slide {
     this.onEnd = this.onEnd.bind(this);
   }
 
+
+  slidePosition(slide) {
+    const margin = (this.wrapper.offsetWidth - slide.offsetWidth) / 2;
+    return -(slide.offsetLeft - margin);
+  }
+
+  slidesConfig() {
+    this.slideArray = [...this.slides.children].map((element) => {
+      const position = this.slidePosition(element);
+      return {
+        position,
+        element,
+      }
+    });
+  }
+
+  slidesIndexNav(index) {
+    const last = this.slideArray.length;
+    this.index = {
+      prev: index ? index-- : undefined,
+      active: index,
+      next: index === last ? undefined : index++,
+    }
+  }
+
+  changeSlide(index) {
+    const activeSlide = this.slideArray[index];
+    this.moveSlide(activeSlide.position);
+    this.slidesIndexNav(index);
+    this.finalPosition = activeSlide.position;
+  }
+
   init() {
     this.bindEvents();
     this.addSlidevents();
+    this.slidesConfig();
     return this;
   }
 }
